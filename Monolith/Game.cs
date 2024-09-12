@@ -13,10 +13,6 @@ public class Game
         
         Guid gameId = Guid.NewGuid();
         
-        //tilføj trace til game()?? 
-        //using var activity  = Program.ActivitySource.StartActivity("Game Nr " + gameId.ToString());
-        
-        
         _games.Add(gameId, new GameModel {GameId = gameId});
         
         var startEvent = new GameStartedEvent { GameId = gameId };
@@ -29,7 +25,7 @@ public class Game
 
     public string DeclareWinner(KeyValuePair<string, Move> p1, KeyValuePair<string, Move> p2)
     {
-        using var declareWinner = Program.ActivitySource.StartActivity("Time it takes to declare Winner.");
+        using var ttDeclareWinnerActivity = Program.ActivitySource.StartActivity("Time it takes to declare a Winner.");
         
         string? winner = null;
 
@@ -63,7 +59,7 @@ public class Game
 
         winner = winner ?? "No winner, it's a tie!";
         Program.Logger1.Verbose("*DRUMROLL* Aaand the WINNER is: {0} ", winner);
-        declareWinner.AddTag("Winner: ", winner);
+        ttDeclareWinnerActivity.AddTag("Winner: ", winner);
         
         
         return winner;

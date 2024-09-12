@@ -19,15 +19,13 @@ public class Program
     
     public static void Main()
     {
-        
-        
-        
-        
         TracerProvider = Sdk.CreateTracerProviderBuilder()
             .AddConsoleExporter()
             .AddZipkinExporter()
             .AddSource(ActivitySource.Name)
             .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(ServiceName))
+            .SetSampler(new AlwaysOnSampler())
+            
             .Build();
         
         Serilog.Log.Logger = new LoggerConfiguration()
@@ -35,17 +33,20 @@ public class Program
             .WriteTo.Console()
             .WriteTo.Seq("http://localhost:5341")
             .Enrich.WithSpan()
+            
             .CreateLogger();
-
-        
-            using var activity = Program.ActivitySource.StartActivity();
         
         var game = new Game();
         
-        for (int i = 0; i < 1000; i++)
-        {
-            using var activity2 = Program.ActivitySource.StartActivity("act2: Game nr " + i.ToString());
-            Logger1.Verbose("Game Nr - forloop logger {0}!", i);
+        using var tracerActivity = Program.ActivitySource.StartActivity("Main Tracer.");
+        
+        for (int i = 1; i < 1001; i++)
+        {   
+            using var gameStartActivitytest = Program.ActivitySource.StartActivity("Game trace service.");
+            
+            using var gameStartAct = Program.ActivitySource.StartActivity("Starting game nr. " + i);
+            
+            Logger1.Verbose("Game Nr. {0}!", i);
             game.Start();
         }
         
